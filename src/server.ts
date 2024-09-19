@@ -1,6 +1,7 @@
 import { hash } from 'bcrypt'
 import express, { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
+import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 import UserModel from './models/User'
 import { registerValidator } from './validators/auth'
@@ -41,7 +42,18 @@ app.post(
 			})
 
 			const user = await doc.save()
-			res.json(user)
+			const userData = user.toObject()
+
+			const token = jwt.sign(
+				{
+					_id: user._id,
+				},
+				'secret',
+				{ expiresIn: '30d' }
+			)
+			const { passwordHash, ...userWithoutPassword } = userData
+
+			res.json({ ...userWithoutPassword, token })
 		} catch (error) {
 			console.error('Ошибка при регистрации: ', error)
 			res.status(500).json({
