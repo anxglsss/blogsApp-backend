@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import UserModel from '../models/user.model'
-import { UserDTO } from '../types/user.dto'
 
 export const login = async (req: Request, res: Response) => {
 	try {
@@ -13,8 +12,6 @@ export const login = async (req: Request, res: Response) => {
 				message: 'User not found!',
 			})
 		}
-
-		const userDto = new UserDTO(user.email, user.fullName, user.avatarUrl)
 
 		const userData = user.toObject()
 		const isValidPassword = await bcrypt.compare(
@@ -37,7 +34,7 @@ export const login = async (req: Request, res: Response) => {
 		)
 		const { passwordHash, ...userWithoutPassword } = userData
 
-		res.json({ token })
+		res.json({ token, ...userWithoutPassword })
 	} catch (error) {
 		console.error('Error while login: ', error)
 		res.status(500).json({ message: 'Error while login' })

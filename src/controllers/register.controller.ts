@@ -8,10 +8,22 @@ import { UserDTO } from '../types/user.dto'
 export const register = async (req: Request, res: Response) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
-		return res.status(400).json(errors.array())
+		return res.status(400).json({
+			success: false,
+			errors: errors.array(),
+			message: 'Validation failed',
+		})
 	}
 
 	try {
+		const existingUser = await UserModel.findOne({ email: req.body.email })
+		if (existingUser) {
+			return res.status(409).json({
+				success: false,
+				message: 'A user with this email already exists.',
+			})
+		}
+
 		const hashedPassword = await hash(req.body.password, 10)
 
 		const userDto = new UserDTO(
@@ -28,7 +40,6 @@ export const register = async (req: Request, res: Response) => {
 		})
 
 		const user = await doc.save()
-		const userData = user.toObject()
 
 		const token = jwt.sign(
 			{
@@ -37,9 +48,8 @@ export const register = async (req: Request, res: Response) => {
 			'secret',
 			{ expiresIn: '30d' }
 		)
-		const { passwordHash, ...userWithoutPassword } = userData
 
-		res.json({ token })
+		res.json({ token, ...userDto })
 	} catch (error) {
 		console.error('Ошибка при регистрации: ', error)
 		res.status(500).json({
