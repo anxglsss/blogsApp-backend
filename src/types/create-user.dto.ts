@@ -2,12 +2,12 @@
 export class UserDTO {
 	email: string
 	fullName: string
-	avatarUrl: string
+	avatarUrl?: string
 
 	constructor(
 		email: string,
 		fullName: string,
-		avatarUrl: string | null | undefined
+		avatarUrl?: string | null | undefined
 	) {
 		this.email = email
 		this.fullName = fullName

@@ -2,7 +2,7 @@ import { compare } from 'bcrypt'
 import passport from 'passport'
 import { Strategy } from 'passport-local'
 import UserModel from '../models/user.model'
-import { UserDTO } from '../types/user.dto'
+import { UserDTO } from '../types/create-user.dto'
 passport.use(
 	new Strategy({ usernameField: 'email' }, async (email, password, done) => {
 		console.log('Local strategy invoked')
